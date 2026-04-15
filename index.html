@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fullscreen GO/NO-GO Trainer</title>
+    <style>
+        body {
+            margin: 0; padding: 0; background-color: black;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; overflow: hidden; font-family: 'Arial Black', sans-serif; color: white;
+            transition: background-color 0.1s; /* 色の切り替わりを鋭く */
+        }
+        #setup-panel {
+            background: rgba(0, 0, 0, 0.85); padding: 30px; border-radius: 20px;
+            max-width: 85%; text-align: left; z-index: 20; border: 2px solid #555;
+        }
+        .config-item { margin: 20px 0; font-size: 1.3rem; display: flex; align-items: center; }
+        input[type="checkbox"] { width: 30px; height: 30px; margin-right: 15px; }
+        #msg { 
+            font-size: 5rem; font-weight: bold; text-shadow: 4px 4px 10px rgba(0,0,0,0.8);
+            z-index: 10; text-align: center; pointer-events: none;
+        }
+        button {
+            padding: 20px; font-size: 1.5rem; background: #00e676;
+            border: none; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="msg">GO / NO-GO</div>
+
+    <div id="setup-panel">
+        <h2 style="margin-top:0; text-align:center;">GO条件設定</h2>
+        <div class="config-item"><input type="checkbox" id="blueSound" checked> 青 ＋ 音</div>
+        <div class="config-item"><input type="checkbox" id="blueOnly"> 青 ＋ 無音</div>
+        <div class="config-item"><input type="checkbox" id="redSound"> 赤 ＋ 音</div>
+        <div class="config-item"><input type="checkbox" id="redOnly"> 赤 ＋ 無音</div>
+        <button onclick="startTraining()">START</button>
+    </div>
+
+    <script>
+        const setupPanel = document.getElementById('setup-panel');
+        const msg = document.getElementById('msg');
+        let isRunning = false;
+
+        function speak(text) {
+            const uttr = new SpeechSynthesisUtterance(text);
+            uttr.lang = "ja-JP";
+            uttr.rate = 1.7; // 現場の緊張感に合わせて少し速め
+            window.speechSynthesis.speak(uttr);
+        }
+
+        function startTraining() {
+            isRunning = true;
+            setupPanel.style.display = 'none';
+            msg.innerText = "READY...";
+            speak("3, 2, 1, 開始");
+            setTimeout(loop, 4000);
+        }
+
+        function loop() {
+            // 背景リセット
+            document.body.style.backgroundColor = "black";
+            msg.innerText = "";
+            
+            // ランダム待機（2〜5秒）
+            const waitTime = Math.random() * 3000 + 2000;
+
+            setTimeout(() => {
+                const isBlue = Math.random() > 0.5;
+                const hasSound = Math.random() > 0.5;
+                const color = isBlue ? 'blue' : 'red';
+                
+                // 画面全体の色を変更
+                document.body.style.backgroundColor = color;
+
+                if (hasSound) speak("ゴー！");
+
+                // GO判定
+                let isGo = false;
+                if (isBlue && hasSound && document.getElementById('blueSound').checked) isGo = true;
+                if (isBlue && !hasSound && document.getElementById('blueOnly').checked) isGo = true;
+                if (!isBlue && hasSound && document.getElementById('redSound').checked) isGo = true;
+                if (!isBlue && !hasSound && document.getElementById('redOnly').checked) isGo = true;
+
+                // 画面中央に判定を表示（オプション：必要なければ msg.innerText = "" に）
+                // msg.innerText = isGo ? "GO!" : "STAY!"; 
+
+                // 5秒後に次のサイクルへ
+                setTimeout(loop, 5000);
+            }, waitTime);
+        }
+    </script>
+</body>
+</html>
