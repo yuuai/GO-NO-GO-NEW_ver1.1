@@ -47,9 +47,15 @@
         function speak(text) {
             const uttr = new SpeechSynthesisUtterance(text);
             uttr.lang = "ja-JP";
-            uttr.rate = 1.7; // 現場の緊張感に合わせて少し速め
-            window.speechSynthesis.speak(uttr);
-        }
+    
+    // 【修正ポイント】
+            uttr.rate = 1.0;   // 1.7から1.0（標準）に変更して聞き取りやすく
+            uttr.pitch = 1.0;  // 声の高さ（1.0が標準）
+            uttr.volume = 1.0; // 音量を最大に設定
+    
+    window.speechSynthesis.cancel(); // 前の音が残っていたら消して即座に再生
+    window.speechSynthesis.speak(uttr);
+}
 
         function startTraining() {
             isRunning = true;
