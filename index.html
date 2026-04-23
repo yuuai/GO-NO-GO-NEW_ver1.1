@@ -9,7 +9,7 @@
             margin: 0; padding: 0; background-color: black;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; overflow: hidden; font-family: 'Arial Black', sans-serif; color: white;
-            transition: background-color 0.1s; /* 色の切り替わりを鋭く */
+            transition: background-color 0.1s;
         }
         #setup-panel {
             background: rgba(0, 0, 0, 0.85); padding: 30px; border-radius: 20px;
@@ -44,24 +44,29 @@
         const msg = document.getElementById('msg');
         let isRunning = false;
 
-        function speak(text) {
+        // 音声読み上げ関数（速度を引数で調整可能に）
+        function speak(text, speed = 1.0) {
+            // 前の音声をキャンセルして即座に再生
+            window.speechSynthesis.cancel();
+            
             const uttr = new SpeechSynthesisUtterance(text);
             uttr.lang = "ja-JP";
-    
-    // 【修正ポイント】
-            uttr.rate = 0.5;   // 1.7から1.0（標準）に変更して聞き取りやすく
-            uttr.pitch = 1.0;  // 声の高さ（1.0が標準）
-            uttr.volume = 1.0; // 音量を最大に設定
-    
-    window.speechSynthesis.cancel(); // 前の音が残っていたら消して即座に再生
-    window.speechSynthesis.speak(uttr);
-}
+            uttr.rate = speed;  // 速度設定
+            uttr.volume = 1.0; // 音量最大
+            uttr.pitch = 1.0;  // 高さ標準
+            
+            window.speechSynthesis.speak(uttr);
+        }
 
         function startTraining() {
             isRunning = true;
             setupPanel.style.display = 'none';
             msg.innerText = "READY...";
-            speak("3, 2, 1, 開始");
+            
+            // カウントダウンは標準速度で聞き取りやすく
+            speak("3, 2, 1, 開始", 1.0);
+            
+            // 音声が終わる頃にループを開始（4秒後）
             setTimeout(loop, 4000);
         }
 
@@ -81,7 +86,8 @@
                 // 画面全体の色を変更
                 document.body.style.backgroundColor = color;
 
-                if (hasSound) speak("ゴー！");
+                // 音声アリの場合：聞き取りやすく少しだけ速めに「ゴー」
+                if (hasSound) speak("ゴー", 1.2);
 
                 // GO判定
                 let isGo = false;
@@ -90,11 +96,8 @@
                 if (!isBlue && hasSound && document.getElementById('redSound').checked) isGo = true;
                 if (!isBlue && !hasSound && document.getElementById('redOnly').checked) isGo = true;
 
-                // 画面中央に判定を表示（オプション：必要なければ msg.innerText = "" に）
-                // msg.innerText = isGo ? "GO!" : "STAY!"; 
-
-                // 3秒後に次のサイクルへ
-                setTimeout(loop, 3000);
+                // 5秒後に次のサイクルへ
+                setTimeout(loop, 5000);
             }, waitTime);
         }
     </script>
